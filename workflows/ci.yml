@@ -1,0 +1,77 @@
+name: CI - Backend PharmaStock
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Tests Backend
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        npm ci
+
+    - name: Run tests
+      run: |
+        cd backend
+        npm test
+      env:
+        NODE_ENV: test
+
+    - name: Run security audit
+      run: |
+        cd backend
+        npm audit --audit-level moderate
+
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        npm ci
+
+    - name: Verify build
+      run: |
+        cd backend
+        npm start &
+        sleep 10
+        curl -f http://localhost:3001/health || exit 1
+
+    - name: Stop server
+      run: |
+        pkill -f "node src/app.js" || true
+  
