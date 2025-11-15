@@ -1,10 +1,5 @@
 const request = require('supertest');
-//const app = require('../app');
-
-const express = require('express');
-const app = express();
-// middleware and routes...
-module.exports = app;
+const app = require('../app');
 
 describe('PharmaStock API Basic Tests', () => {
   it('GET /api/produits should return a list of products', async () => {
