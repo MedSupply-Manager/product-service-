@@ -28,14 +28,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run SonarCloud Analysis
-        run: |
-          npm install -g sonar-scanner
-          sonar-scanner `
-            -Dsonar.projectKey="MedSupply-Manager_product-service-" `
-            -Dsonar.sources="." `
-            -Dsonar.host.url="https://sonarcloud.io" `
-            -Dsonar.organization="medsupply-manager" `
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" `
-            -Dsonar.coverage.exclusions="coverage/**,test/**,node_modules/**"
-        shell: pwsh  # Use PowerShell for Windows
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
