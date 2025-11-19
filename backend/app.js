@@ -16,6 +16,9 @@ app.use(express.json());
 // ROUTES POUR PRODUITS NORMAUX
 // =============================================
 
+// Déclare tes routes ici (conserve tes routes réelles si elles existent déjà)
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 // GET - Tous les produits normaux
 app.get('/api/produits', async (req, res) => {
   try {
@@ -449,33 +452,43 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Initialisation avec données d'exemple
-async function startServer() {
+async function init(options = { log: true }) {
+  const { log } = options;
   try {
     await sequelize.authenticate();
-    console.log('✅ Connecté à la base de données SQLite');
+    if (log) console.log('✅ Connecté à la base de données SQLite');
 
-    // Synchroniser les tables
-    await sequelize.sync({ force: false });
-    console.log('✅ Tables synchronisées');
+    await sequelize.sync();
+    if (log) console.log('✅ Tables synchronisées');
 
-    // Vérifier le contenu de la base
-    const totalProduits = await Produit.count();
-    const totalSensibles = await ProduitSensible.count();
-    console.log(`📊 Base de données : ${totalProduits} produits normaux, ${totalSensibles} produits sensibles`);
-  
-    app.listen(PORT, () => {
-      console.log(`🚀 Service Produits Médicaux démarré sur le port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      console.log(`💊 API Produits Normaux: http://localhost:${PORT}/api/produits`);
-      console.log(`🔒 API Produits Sensibles: http://localhost:${PORT}/api/produits-sensibles`);
-    });
-
+    // Comptage / seed idempotent — adapte selon ton seed réel
+    const totalProduits = await sequelize.models.Produit.count();
+    const totalSensibles = await sequelize.models.ProduitSensible.count();
+    if (log) console.log(`📊 Base de données : ${totalProduits} produits normaux, ${totalSensibles} produits sensibles`);
   } catch (error) {
-    console.error('❌ Erreur démarrage serveur:', error);
+    if (options.log) console.error("Erreur d'initialisation:", error);
+    throw error;
   }
 }
 
-startServer();
+// Si ce module est exécuté directement (node backend/app.js), on initialise puis on écoute.
+// Lors d'un require() (tests), require.main !== module, donc on n'écoute pas automatiquement.
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  (async () => {
+    try {
+      await init({ log: true });
+      app.listen(PORT, () => {
+        console.log(`🚀 Service Produits Médicaux démarré sur le port ${PORT}`);
+        console.log(`📊 Health check: http://localhost:${PORT}/health`);
+        console.log(`💊 API Produits Normaux: http://localhost:${PORT}/api/produits`);
+        console.log(`🔒 API Produits Sensibles: http://localhost:${PORT}/api/produits-sensibles`);
+      });
+    } catch (err) {
+      console.error('Erreur au démarrage :', err);
+      process.exit(1);
+    }
+  })();
+}
 
-module.exports = app;
+module.exports = { app, init, sequelize };
