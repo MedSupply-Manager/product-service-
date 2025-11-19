@@ -33,9 +33,9 @@ jobs:
           npm install -g sonar-scanner
           sonar-scanner `
             -Dsonar.projectKey="MedSupply-Manager_product-service-" `
-            -Dsonar.sources=. `
-            -Dsonar.host.url=https://sonarcloud.io `
-            -Dsonar.organization=medsupply-manager `
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} `
-            -Dsonar.coverage.exclusions=coverage/**,test/**,node_modules/**
+            -Dsonar.sources="." `
+            -Dsonar.host.url="https://sonarcloud.io" `
+            -Dsonar.organization="medsupply-manager" `
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" `
+            -Dsonar.coverage.exclusions="coverage/**,test/**,node_modules/**"
         shell: pwsh  # Use PowerShell for Windows
