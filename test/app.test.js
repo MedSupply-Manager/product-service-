@@ -1,5 +1,24 @@
 const request = require('supertest');
-const app = require('../backend/app');
+const { app, init, sequelize } = require('../backend/app');
+
+let logMock;
+let errorMock;
+
+beforeAll(async () => {
+  // Neutralise les console.log et console.error pendant les tests pour éviter "Cannot log after tests are done"
+  logMock = jest.spyOn(console, 'log').mockImplementation(() => {});
+  errorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+  // Attend que la DB et les tables soient prêtes
+  await init({ log: false });
+});
+
+afterAll(async () => {
+  // Restaure les mocks et ferme la connexion DB pour que Jest puisse s'arrêter proprement
+  logMock.mockRestore();
+  errorMock.mockRestore();
+  await sequelize.close();
+});
 
 describe('PharmaStock API Basic Tests', () => {
   it('GET /api/produits should return a list of products', async () => {
