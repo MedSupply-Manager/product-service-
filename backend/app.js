@@ -17,7 +17,7 @@ app.use(express.json());
 // =============================================
 
 // Déclare tes routes ici (conserve tes routes réelles si elles existent déjà)
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'Service Produits Médicaux en marche' }));
 
 // GET - Tous les produits normaux
 app.get('/api/produits', async (req, res) => {
