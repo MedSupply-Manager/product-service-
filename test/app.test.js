@@ -40,8 +40,8 @@ describe('PharmaStock API Basic Tests', () => {
 
   it('GET /api/categories should return categories list', async () => {
     const res = await request(app).get('/api/categories');
-   // expect(res.statusCode).toBe(200);
-   // expect(res.body).toContain('Analgésiques');
-   // expect(res.body).toContain('Morphiniques');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Analgésiques');
+    expect(res.body).toContain('Morphiniques');
   });
 });
