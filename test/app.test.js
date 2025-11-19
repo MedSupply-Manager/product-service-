@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../app');
+const app = require('../backend/app');
 
 describe('PharmaStock API Basic Tests', () => {
   it('GET /api/produits should return a list of products', async () => {
