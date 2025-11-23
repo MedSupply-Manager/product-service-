@@ -4,7 +4,7 @@
   "description": "Microservice de gestion des produits avec Sequelize",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node backend/app.js",
     "dev": "nodemon app.js",
     "test": "jest test/app.test.js",
     "test:watch": "jest --watch test/app.test.js"
