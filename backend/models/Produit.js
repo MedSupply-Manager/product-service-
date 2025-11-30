@@ -62,6 +62,11 @@ const Produit = sequelize.define('Produit', {
   classe_therapeutique: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  nom_fabricant: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Fabricant Inconnu' 
   }
 }, {
   tableName: 'produits',

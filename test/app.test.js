@@ -23,6 +23,7 @@ afterAll(async () => {
 describe('PharmaStock API Basic Tests', () => {
   it('GET /api/produits should return a list of products', async () => {
     const res = await request(app).get('/api/produits');
+    console.log('GET /api/produits error:', res.body.error);
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
@@ -45,16 +46,20 @@ describe('PharmaStock API Basic Tests', () => {
       prix: 10.50,
       categorie: 'Analgésiques',
       quantite: 25,
-      seuil_alerte: 5
+      seuil_alerte: 5,
+      nom_fabricant: 'Test Fabricant'
     };
+    console.log('Creating product with data:', newProduct);
 
     const res = await request(app)
       .post('/api/produits')
       .send(newProduct);
 
+    console.log('POST /api/produits error:', res.body.error);
     expect(res.statusCode).toBe(201);
     expect(res.body.nom).toBe('Test Product');
     expect(res.body.prix).toBe(10.50);
+    expect(res.body.nom_fabricant).toBe('Test Fabricant');
   });
 
   it('GET /api/categories should return categories list', async () => {
