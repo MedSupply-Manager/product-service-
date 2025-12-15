@@ -141,4 +141,74 @@ router.delete('/produits/:id', async (req, res) => {
   }
 });
 
+router.patch('/stock/change', async (req, res) => {
+  try {
+    const { items, checkoutId } = req.body;
+
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ error: 'Invalid items payload' });
+    }
+
+    const results = [];
+
+    for (const item of items) {
+      const { productId, quantityChange } = item;
+
+      const produit = await Produit.findByPk(productId);
+      if (!produit) {
+        results.push({ productId, error: 'Produit non trouvé' });
+        continue;
+      }
+
+      const oldQuantity = produit.quantite;
+      const quantityToAdd = Math.abs(quantityChange);
+      const newQuantity = oldQuantity + quantityToAdd;
+      
+
+      /* Optional safety check */
+      if (newQuantity < 0) {
+        results.push({
+          productId,
+          error: 'Stock insuffisant',
+          oldQuantity
+        });
+        continue;
+      }
+
+      produit.quantite = newQuantity;
+      await produit.save();
+
+      const actionType = quantityChange > 0 ? 'STOCK AJOUTÉ' : 'STOCK RETIRÉ';
+      const changeType = quantityChange > 0 ? 'ajouté' : 'retiré';
+      const absQuantity = Math.abs(quantityChange);
+
+      await Historique.create({
+        action: actionType,
+        produit_id: produit.id,
+        produit_nom: produit.nom,
+        type_produit: 'NORMAL',
+        details: `${absQuantity} unités ${changeType} pour ${produit.nom}. Stock: ${oldQuantity} → ${produit.quantite}`,
+        checkout_id: checkoutId
+      });
+
+      results.push({
+        productId,
+        success: true,
+        oldQuantity,
+        newQuantity: produit.quantite,
+        quantityChange
+      });
+    }
+
+    res.json({
+      message: 'Stock updates processed',
+      checkoutId,
+      results
+    });
+
+  } catch (error) {
+    console.error('Stock update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 module.exports = router;
